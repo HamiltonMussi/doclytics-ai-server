@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { LlmInteractionsModule } from './modules/llm-interactions/llm-interactions.module';
 
@@ -9,7 +9,7 @@ import { LlmInteractionsModule } from './modules/llm-interactions/llm-interactio
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    AuthModule,
+    UsersModule,
     DocumentsModule,
     LlmInteractionsModule,
   ],

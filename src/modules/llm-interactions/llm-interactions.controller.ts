@@ -1,7 +1,7 @@
 import { Controller, Post, Get, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { LlmInteractionsService } from './llm-interactions.service';
 import { AskQuestionDto } from './dto/ask-question.dto';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../users/jwt-auth.guard';
 
 @Controller('documents/:documentId/interactions')
 @UseGuards(JwtAuthGuard)
