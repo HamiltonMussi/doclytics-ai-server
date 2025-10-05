@@ -22,9 +22,19 @@ export class LlmInteractionsService {
       throw new NotFoundException('Document text not extracted yet');
     }
 
+    const previousInteractions = await this.prisma.llmInteraction.findMany({
+      where: { documentId },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        question: true,
+        answer: true,
+      },
+    });
+
     const answer = await this.llmService.answerQuestion(
       document.extractedText,
       question,
+      previousInteractions,
     );
 
     const interaction = await this.prisma.llmInteraction.create({

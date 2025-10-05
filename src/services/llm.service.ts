@@ -25,21 +25,38 @@ Resumo:`;
     return response.text();
   }
 
-  async answerQuestion(documentText: string, question: string): Promise<string> {
-    const prompt = `Você é um assistente especializado em análise de documentos. Sua tarefa é responder perguntas baseando-se EXCLUSIVAMENTE no conteúdo do documento fornecido.
+  async answerQuestion(
+    documentText: string,
+    question: string,
+    previousInteractions?: Array<{ question: string; answer: string }>,
+  ): Promise<string> {
+    let conversationContext = '';
+
+    if (previousInteractions && previousInteractions.length > 0) {
+      conversationContext = '\n---HISTÓRICO DE CONVERSAS ANTERIORES (para contexto)---\n';
+      previousInteractions.forEach((interaction) => {
+        conversationContext += `\nHumano: ${interaction.question}\nAssistente: ${interaction.answer}\n`;
+      });
+      conversationContext += '\n---FIM DO HISTÓRICO---\n';
+    }
+
+    const prompt = `Você é um assistente especializado em análise de documentos. Sua tarefa é responder perguntas baseando-se EXCLUSIVAMENTE no conteúdo do DOCUMENTO fornecido abaixo.
 
 Regras:
-- Responda apenas com informações presentes no documento
-- Se a informação não estiver no documento, diga claramente que não encontrou
+- Responda apenas com informações presentes no DOCUMENTO
+- O histórico de conversas é apenas para contexto, NÃO invente informações que não estejam no documento
+- Se a informação não estiver no DOCUMENTO, diga claramente que não encontrou
 - Seja claro, objetivo e conciso
 - Use formatação markdown se necessário para melhor legibilidade
 
-Documento:
+---DOCUMENTO ORIGINAL (fonte da verdade)---
 ${documentText}
+---FIM DO DOCUMENTO---
+${conversationContext}
 
-Pergunta: ${question}
+Pergunta atual do Humano: ${question}
 
-Resposta:`;
+Resposta do Assistente:`;
 
     const result = await this.model.generateContent(prompt);
     const response = result.response;
