@@ -52,6 +52,6 @@ export class DocumentsService {
       where: { id: document.id },
     });
 
-    return { message: 'Document deleted successfully' };
+    return document;
   }
 }

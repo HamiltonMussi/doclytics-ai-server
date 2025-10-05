@@ -15,11 +15,15 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentsService } from './documents.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { StorageService } from '../../services/storage.service';
 
 @Controller('documents')
 @UseGuards(JwtAuthGuard)
 export class DocumentsController {
-  constructor(private readonly documentsService: DocumentsService) {}
+  constructor(
+    private readonly documentsService: DocumentsService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
@@ -35,9 +39,7 @@ export class DocumentsController {
     file: Express.Multer.File,
     @Request() req,
   ) {
-    // TODO: salvar arquivo em storage (S3, local, etc)
-    // Por enquanto, apenas simulando com o nome do arquivo
-    const fileUrl = `/uploads/${Date.now()}-${file.originalname}`;
+    const fileUrl = await this.storageService.upload(file);
 
     const document = await this.documentsService.create(
       req.user.id,
@@ -60,6 +62,12 @@ export class DocumentsController {
 
   @Delete(':id')
   async remove(@Param('id') id: string, @Request() req) {
-    return this.documentsService.remove(id, req.user.id);
+    const document = await this.documentsService.findOne(id, req.user.id);
+
+    await this.storageService.delete(document.fileUrl);
+
+    await this.documentsService.remove(id, req.user.id);
+
+    return { message: 'Document deleted successfully' };
   }
 }
