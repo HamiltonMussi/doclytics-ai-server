@@ -46,6 +46,8 @@ export class DocumentsController {
       file.originalname,
       fileUrl,
     );
+    // TODO: change this to queue
+    this.documentsService.processOcrInBackground(document.id, fileUrl);
 
     return document;
   }

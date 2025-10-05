@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
+import { OcrService } from '../../services/ocr.service';
 
 @Injectable()
 export class DocumentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private ocrService: OcrService,
+  ) {}
 
   async create(userId: string, fileName: string, fileUrl: string) {
     const existingDocument = await this.prisma.document.findFirst({
@@ -53,5 +57,36 @@ export class DocumentsService {
     });
 
     return document;
+  }
+
+  async processOcr(documentId: string, fileUrl: string) {
+    try {
+      await this.prisma.document.update({
+        where: { id: documentId },
+        data: { ocrStatus: 'PROCESSING' },
+      });
+
+      const extractedText = await this.ocrService.extractText(fileUrl);
+
+      await this.prisma.document.update({
+        where: { id: documentId },
+        data: {
+          extractedText,
+          ocrStatus: 'COMPLETED',
+        },
+      });
+    } catch (error) {
+      await this.prisma.document.update({
+        where: { id: documentId },
+        data: { ocrStatus: 'FAILED' },
+      });
+      console.error('OCR processing failed:', error);
+    }
+  }
+
+  processOcrInBackground(documentId: string, fileUrl: string) {
+    this.processOcr(documentId, fileUrl).catch((error) => {
+      console.error('Background OCR error:', error);
+    });
   }
 }

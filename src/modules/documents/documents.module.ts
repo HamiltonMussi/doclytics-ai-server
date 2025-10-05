@@ -3,10 +3,11 @@ import { DocumentsService } from './documents.service';
 import { DocumentsController } from './documents.controller';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { StorageService } from '../../services/storage.service';
+import { OcrService } from '../../services/ocr.service';
 
 @Module({
   controllers: [DocumentsController],
-  providers: [DocumentsService, PrismaService, StorageService],
+  providers: [DocumentsService, PrismaService, StorageService, OcrService],
   exports: [DocumentsService],
 })
 export class DocumentsModule {}
