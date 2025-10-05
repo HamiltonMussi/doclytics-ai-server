@@ -15,6 +15,10 @@ export class LlmService {
     const prompt = `Você é um assistente que resume documentos.
 Leia o texto extraído abaixo e crie um resumo conciso (máximo 3-4 linhas) destacando as informações mais importantes.
 
+Regras:
+- Seja claro, objetivo e conciso
+- Use formatação markdown se necessário para melhor legibilidade
+
 Texto:
 ${text}
 
