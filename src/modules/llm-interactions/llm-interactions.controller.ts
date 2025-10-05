@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
 import { LlmInteractionsService } from './llm-interactions.service';
 import { AskQuestionDto } from './dto/ask-question.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -24,5 +24,10 @@ export class LlmInteractionsController {
   @Get()
   async findAll(@Param('documentId') documentId: string, @Request() req) {
     return this.llmInteractionsService.getInteractions(documentId, req.user.id);
+  }
+
+  @Delete()
+  async clear(@Param('documentId') documentId: string, @Request() req) {
+    return this.llmInteractionsService.clearInteractions(documentId, req.user.id);
   }
 }

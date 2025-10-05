@@ -62,4 +62,20 @@ export class LlmInteractionsService {
       orderBy: { createdAt: 'asc' },
     });
   }
+
+  async clearInteractions(documentId: string, userId: string) {
+    const document = await this.prisma.document.findFirst({
+      where: { id: documentId, userId },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    await this.prisma.llmInteraction.deleteMany({
+      where: { documentId },
+    });
+
+    return { message: 'Interactions cleared successfully' };
+  }
 }
