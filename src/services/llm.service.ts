@@ -24,4 +24,25 @@ Resumo:`;
     const response = result.response;
     return response.text();
   }
+
+  async answerQuestion(documentText: string, question: string): Promise<string> {
+    const prompt = `Você é um assistente especializado em análise de documentos. Sua tarefa é responder perguntas baseando-se EXCLUSIVAMENTE no conteúdo do documento fornecido.
+
+Regras:
+- Responda apenas com informações presentes no documento
+- Se a informação não estiver no documento, diga claramente que não encontrou
+- Seja claro, objetivo e conciso
+- Use formatação markdown se necessário para melhor legibilidade
+
+Documento:
+${documentText}
+
+Pergunta: ${question}
+
+Resposta:`;
+
+    const result = await this.model.generateContent(prompt);
+    const response = result.response;
+    return response.text();
+  }
 }

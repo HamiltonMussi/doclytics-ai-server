@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { LlmInteractionsModule } from './modules/llm-interactions/llm-interactions.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
     }),
     AuthModule,
     DocumentsModule,
+    LlmInteractionsModule,
   ],
 })
 export class AppModule {}
