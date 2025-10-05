@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../shared/prisma/prisma.service';
 import { OcrService } from '../../services/ocr.service';
+import { LlmService } from '../../services/llm.service';
 
 @Injectable()
 export class DocumentsService {
   constructor(
     private prisma: PrismaService,
     private ocrService: OcrService,
+    private llmService: LlmService,
   ) {}
 
   async create(userId: string, fileName: string, fileUrl: string) {
@@ -68,10 +70,13 @@ export class DocumentsService {
 
       const extractedText = await this.ocrService.extractText(fileUrl);
 
+      const summary = await this.llmService.generateSummary(extractedText);
+
       await this.prisma.document.update({
         where: { id: documentId },
         data: {
           extractedText,
+          summary,
           ocrStatus: 'COMPLETED',
         },
       });

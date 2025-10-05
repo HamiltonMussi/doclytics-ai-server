@@ -33,6 +33,7 @@ model Document {
   fileName      String
   fileUrl       String
   extractedText String?   @db.Text
+  summary       String?   @db.Text
   ocrStatus     OcrStatus @default(PENDING)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
