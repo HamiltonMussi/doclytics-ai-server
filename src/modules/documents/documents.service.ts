@@ -61,14 +61,14 @@ export class DocumentsService {
     return document;
   }
 
-  async processOcr(documentId: string, fileUrl: string) {
+  async processOcr(documentId: string, buffer: Buffer) {
     try {
       await this.prisma.document.update({
         where: { id: documentId },
         data: { ocrStatus: 'PROCESSING' },
       });
 
-      const extractedText = await this.ocrService.extractText(fileUrl);
+      const extractedText = await this.ocrService.extractTextFromBuffer(buffer);
 
       const summary = await this.llmService.generateSummary(extractedText);
 
@@ -89,8 +89,8 @@ export class DocumentsService {
     }
   }
 
-  processOcrInBackground(documentId: string, fileUrl: string) {
-    this.processOcr(documentId, fileUrl).catch((error) => {
+  processOcrInBackground(documentId: string, buffer: Buffer) {
+    this.processOcr(documentId, buffer).catch((error) => {
       console.error('Background OCR error:', error);
     });
   }
