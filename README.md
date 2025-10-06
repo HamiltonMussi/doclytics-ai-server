@@ -46,13 +46,18 @@ cp .env.example .env
 # Edit .env with your credentials
 ```
 
-4. Set up the database
+4. Start PostgreSQL with Docker Compose
+```bash
+docker-compose up -d
+```
+
+5. Set up the database
 ```bash
 npx prisma generate
 npx prisma migrate dev
 ```
 
-5. Start the development server
+6. Start the development server
 ```bash
 npm run start:dev
 ```
