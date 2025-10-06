@@ -94,4 +94,72 @@ export class DocumentsService {
       console.error('Background OCR error:', error);
     });
   }
+
+  async generateAnnotatedDocument(documentId: string, userId: string): Promise<string> {
+    const document = await this.prisma.document.findFirst({
+      where: { id: documentId, userId },
+      include: {
+        interactions: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    });
+
+    if (!document) {
+      throw new NotFoundException('Document not found');
+    }
+
+    const sections: string[] = [];
+
+    sections.push('='.repeat(80));
+    sections.push('EXTRACTED TEXT');
+    sections.push('='.repeat(80));
+    sections.push('');
+    sections.push(document.extractedText || 'No text extracted');
+    sections.push('');
+    sections.push('');
+
+    if (document.summary) {
+      sections.push('='.repeat(80));
+      sections.push('SUMMARY');
+      sections.push('='.repeat(80));
+      sections.push('');
+      sections.push(this.stripMarkdown(document.summary));
+      sections.push('');
+      sections.push('');
+    }
+
+    if (document.interactions.length > 0) {
+      sections.push('='.repeat(80));
+      sections.push('LLM INTERACTIONS');
+      sections.push('='.repeat(80));
+      sections.push('');
+
+      document.interactions.forEach((interaction, index) => {
+        sections.push(`[Interaction ${index + 1}]`);
+        sections.push('-'.repeat(80));
+        sections.push('');
+        sections.push('HUMAN:');
+        sections.push(interaction.question);
+        sections.push('');
+        sections.push('ASSISTANT:');
+        sections.push(this.stripMarkdown(interaction.answer));
+        sections.push('');
+        sections.push('');
+      });
+    }
+
+    return sections.join('\n');
+  }
+
+  private stripMarkdown(text: string): string {
+    return text
+      .replace(/```[\s\S]*?```/g, (match) => match.replace(/```\w*\n?/g, ''))
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/\*([^*]+)\*/g, '$1')
+      .replace(/^#+\s+/gm, '')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/^[*\-+]\s+/gm, '• ');
+  }
 }

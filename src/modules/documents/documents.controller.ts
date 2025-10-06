@@ -11,8 +11,10 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { Response } from 'express';
 import { DocumentsService } from './documents.service';
 import { JwtAuthGuard } from '../users/jwt-auth.guard';
 import { StorageService } from '../../services/storage.service';
@@ -71,5 +73,21 @@ export class DocumentsController {
     await this.documentsService.remove(id, req.user.id);
 
     return { message: 'Document deleted successfully' };
+  }
+
+  @Get(':id/download')
+  async downloadWithAnnotations(
+    @Param('id') id: string,
+    @Request() req,
+    @Res() res: Response,
+  ) {
+    const content = await this.documentsService.generateAnnotatedDocument(id, req.user.id);
+
+    const document = await this.documentsService.findOne(id, req.user.id);
+    const fileName = document.fileName.replace(/\.[^/.]+$/, '') + '_annotated.txt';
+
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(content);
   }
 }
